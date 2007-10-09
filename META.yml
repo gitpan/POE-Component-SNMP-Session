@@ -1,0 +1,16 @@
+--- #YAML:1.0
+name:                POE-Component-SNMP-Session
+version:             0.07
+abstract:            Wrap Net-SNMP's SNMP::Session in POE
+license:             ~
+generated_by:        ExtUtils::MakeMaker version 6.36
+distribution_type:   module
+requires:     
+    POE:                           0.38
+    SNMP:                          3.1
+    Test::More:                    0
+meta-spec:
+    url:     http://module-build.sourceforge.net/META-spec-v1.2.html
+    version: 1.2
+author:
+    - Rob Bloodgood <rdb@cpan.org>
