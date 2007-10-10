@@ -20,11 +20,11 @@ POE::Component::SNMP::Session - Wrap Net-SNMP's SNMP::Session in POE
 
 =head1 VERSION
 
-Version 0.06
+Version 0.08
 
 =cut
 
-our $VERSION = '0.07';
+our $VERSION = '0.08';
 
 =head1 SYNOPSIS
 

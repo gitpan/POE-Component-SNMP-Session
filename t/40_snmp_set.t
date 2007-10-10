@@ -3,7 +3,7 @@ use Test::More;
 
 BEGIN { use_ok('POE::Component::SNMP::Session') };
 
-use POE qw/Component::SNMP/;
+use POE qw/Component::SNMP::Session/;
 
 use lib qw(t);
 use TestPCS;

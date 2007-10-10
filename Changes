@@ -1,9 +1,11 @@
 Revision history for POE-Component-SNMP-Session
 
-0.08
+0.08    Wed Oct 10 10:30:25 PDT 2007
         Finished docs.
         
         Stripped unnecessary dispatcher code.
+        
+        Fixed a testing bug.
 
 0.01    Wed Jul 11 23:57:02 PDT 2007
         First version, hoping we caught everything!
