@@ -20,11 +20,11 @@ POE::Component::SNMP::Session - Wrap Net-SNMP's SNMP::Session in POE
 
 =head1 VERSION
 
-Version 0.08
+Version 0.09
 
 =cut
 
-our $VERSION = '0.08';
+our $VERSION = '0.09';
 
 =head1 SYNOPSIS
 
@@ -48,7 +48,7 @@ L<Net::SNMP>.
 
 our $DEBUG = 0;
 
-use Spiffy qw/:XXX/;
+# use Spiffy qw/:XXX/;
 
 our $DISPATCHER;
 
@@ -206,6 +206,8 @@ sub create {
                                    $arg{desthost}
                                   ],
 			);
+
+    return $session;
 }
 
 # }}} create

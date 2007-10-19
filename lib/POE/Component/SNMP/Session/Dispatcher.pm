@@ -4,7 +4,7 @@ use strict;
 use warnings;
 
 use SNMP;
-use Spiffy qw/:XXX/;
+# use Spiffy qw/:XXX/;
 
 use Carp;
 # use base qw/SNMP::Session/;

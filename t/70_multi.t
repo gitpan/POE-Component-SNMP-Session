@@ -165,7 +165,6 @@ sub snmp_run_tests {
 
     }
 
-    use Spiffy qw/:XXX/;
     $kernel->post( snmp   => get   => get_cb  => # -varbindlist =>
                    [ map {[$_]} @oids ] ); $heap->{pending}{snmp}++;
     get_sent($heap);
