@@ -10,6 +10,7 @@ WriteMakefile(
               AUTHOR              => 'Rob Bloodgood <rdb@cpan.org>',
               VERSION_FROM        => 'lib/POE/Component/SNMP/Session.pm',
               ABSTRACT_FROM       => 'lib/POE/Component/SNMP/Session.pm',
+              LICENSE             => 'perl',
               PL_FILES            => {},
               PREREQ_PM           => {
                                       'SNMP'       => 3.1,

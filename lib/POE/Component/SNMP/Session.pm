@@ -20,11 +20,11 @@ POE::Component::SNMP::Session - Wrap Net-SNMP's SNMP::Session in POE
 
 =head1 VERSION
 
-Version 0.09
+Version 0.10
 
 =cut
 
-our $VERSION = '0.09';
+our $VERSION = '0.10';
 
 =head1 SYNOPSIS
 
@@ -74,7 +74,7 @@ BEGIN
 
 =item B<create> - create an SNMP session
 
-The constructor takes the same arguments as the L<SNMP::Session>
+The constructor takes the same arguments as the L<SNMP/SNMP::Session>
 module, with one addition.
 
 =over 4
@@ -316,8 +316,11 @@ to the SNMP::Session method of the same name.
 =item set
 
 These are the request types the component knows about.  Details on the
-correct parameters for each request type are in the
-L<SNMP/SNMP::Session> docs.
+correct parameters for each request type are available at
+L<SNMP/SNMP::Session>.
+
+There are several valid ways to specify query parameters, listed at
+L<SNMP/Acceptable variable formats:>.
 
 For sending traps, you should instantiate an SNMP::TrapSession object
 directly.
@@ -451,6 +454,19 @@ sub _arg_scan {
 
 =head1 CALLBACK STATES
 
+ sub snmp_response {
+     my($kernel, $heap, $request, $response) = @_[KERNEL, HEAP, ARG0, ARG1];
+
+     my ($alias,   $host, $session, $cmd, @args)  = @$request;
+     my ($results) = @$response;
+
+     my $value = $results->[0][2];
+
+     # ... stuff ...
+ }
+
+
+
 A callback state (a POE event) is invoked when the component either
 receives a response or timeout.  The event receives data in its
 C<$_[ARG0]> and C<$_[ARG1]> parameters.
@@ -461,8 +477,10 @@ hostname (C<DestHost>) the component is communicating with.
 
 C<$_[ARG0]> is an array reference containing: the response value.
 
-If the response value is defined, it will be a SNMP::VarBindList
-object containing the SNMP results.
+If the response value is defined, it will be a C<SNMP::VarList> object
+containing the SNMP results.  The C<SNMP::VarList> object is a blessed
+reference to an array of C<SNMP::Varbind> objects.  See
+L<SNMP/Acceptable variable formats:> for more details.
 
 If the response value is C<undef>, then any error message can be
 accessed via the C<SNMP::Session> object as $session->{ErrorStr}.
@@ -478,11 +496,11 @@ Rob Bloodgood, C<< <rdb at cpan.org> >>
 =head1 CAVEATS
 
 SNMPv3 connections automatically send a synchronous (blocking) request
-to establish authorization.  If the request times out (for example if
-the agent is not responding), the entire program will block for
-$timeout microseconds.  YMMV, but for unreliable or slow connections,
-you may want to try a smaller timeout value, so you receive a failure
-more quickly.
+to establish authorization (technically, it probes for the engineID).
+If the request times out (for example if the agent is not responding),
+the entire program will block for C<Timeout> microseconds.  YMMV, but
+for unreliable or slow connections, you may want to try a smaller
+timeout value, so you receive a failure more quickly.
 
 =head1 BUGS
 

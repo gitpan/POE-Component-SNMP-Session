@@ -1,8 +1,8 @@
 --- #YAML:1.0
 name:                POE-Component-SNMP-Session
-version:             0.09
+version:             0.10
 abstract:            Wrap Net-SNMP's SNMP::Session in POE
-license:             ~
+license:             perl
 generated_by:        ExtUtils::MakeMaker version 6.36
 distribution_type:   module
 requires:     

@@ -1,5 +1,11 @@
 Revision history for POE-Component-SNMP-Session
 
+0.10    Fri Oct 19 12:55:56 PDT 2007
+
+        Updated docs.  Added a couple of examples, and corrected the
+        type names returned to query callbacks.  Also updated the
+        LICENSE in Makefile.PL... love those Kwalitee points!
+
 0.09    Thu Oct 18 18:19:45 PDT 2007
         Had left behind references to Spiffy.pm for debugging
         purposes.  Oops.
