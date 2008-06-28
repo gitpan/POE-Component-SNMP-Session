@@ -1,7 +1,7 @@
 use Test::More; # qw/no_plan/;
 use strict;
 
-BEGIN { use_ok 'POE::Component::SNMP::Session' };
+# BEGIN { use_ok 'POE::Component::SNMP::Session' };
 
 use POE;
 use POE::Component::SNMP::Session;

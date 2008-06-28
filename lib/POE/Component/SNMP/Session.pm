@@ -20,11 +20,11 @@ POE::Component::SNMP::Session - Wrap Net-SNMP's SNMP::Session in POE
 
 =head1 VERSION
 
-Version 0.10
+Version 0.11
 
 =cut
 
-our $VERSION = '0.10';
+our $VERSION = '0.11';
 
 =head1 SYNOPSIS
 
@@ -36,7 +36,7 @@ POE's non-blocking event loop, to perform asynchronous SNMP requests.
     POE::Component::SNMP::Session->create();
     ...
 
-NOTE: this is NOT compatible with the L<Net::SNMP> module by David
+NOTE: this is NOT based on the L<Net::SNMP> module by David
 Town.  See L<POE::Component::SNMP> for an async interface to
 L<Net::SNMP>.
 
@@ -87,21 +87,20 @@ receive.  If this parameter is not supplied, the default value is
 environment, POE might throw an error, or it might not.  So don't do
 that.
 
-=item DestHost
-
-This parameter is technically optional, and defaults to 'localhost',
-but you I<really> should set it.  Also, this parameter name is Case
-Sensitive, so it must be supplied in mixed case as shown here.
-
 =back
 
-All other parameters are passed through to SNMP::Session untouched.
+The C<DestHost> parameter is technically optional, and defaults to
+'localhost', but you I<really> should set it.  Also, this parameter
+name is Case Sensitive, so it must be supplied in mixed case as shown
+here.
+
+All other parameters are passed through to C<SNMP::Session> untouched.
 
 NOTE: SNMPv3 session creation blocks until authorization completes.
-This means that if your DestHost doesn't respond, your program will
-block for Timeout microseconds (default 1s).  Also, if authentication
-fails, the constructor will fail, so it is important to check the
-return value of C<create()> in this case.
+This means that if your C<DestHost> doesn't respond, your program will
+block for C<Timeout> microseconds (default 1s).  Also, if
+authentication fails, the constructor will fail, so it is important to
+check the return value of C<create()> in this case.
 
 =back
 
@@ -309,11 +308,33 @@ to the SNMP::Session method of the same name.
 
 =item getnext
 
+  $poe_kernel->post( snmp => getnext => $state => ['sysUpTime'] );
+
 =item getbulk
+
+  $poe_kernel->post( snmp => getbulk => $state =>
+                     # nonrepeaters
+                     1,
+                     # maxrepetitions
+                     8,
+                     # vars
+                     new SNMP::VarList (['ifNumber'], ['ifSpeed'], ['ifDescr'])
+                   );
+
 
 =item bulkwalk
 
+  $poe_kernel->post( snmp => bulkwalk => $state =>
+                     1, 8,
+                     new SNMP::VarList (['ifNumber'], ['ifSpeed'], ['ifDescr'])
+                   );
+
 =item set
+
+	    $poe_kernel->post( snmp => set => $state =>
+                               [ 'sysContact' ] => 'sample@test.com',
+	                     );
+
 
 These are the request types the component knows about.  Details on the
 correct parameters for each request type are available at
@@ -385,7 +406,8 @@ sub _snmp_request {
         }
 
         # this $postback is a closure.  it goes away after firing.
-        my $postback = $sender->postback($target_state => @postback_args);
+        # my $postback = $sender->postback($target_state => @postback_args);
+        my $postback = $sender->callback($target_state => @postback_args);
 
         $ok = $DISPATCHER->_send_pdu($session => $method => \@snmp_args, $postback, \@callback_args);
 
@@ -475,7 +497,7 @@ C<$_[ARG0]> is an array reference containing: the C<SNMP::Session> object
 that the component is using, the alias of the component, and the
 hostname (C<DestHost>) the component is communicating with.
 
-C<$_[ARG0]> is an array reference containing: the response value.
+C<$_[ARG1]> is an array reference containing: the response value.
 
 If the response value is defined, it will be a C<SNMP::VarList> object
 containing the SNMP results.  The C<SNMP::VarList> object is a blessed
@@ -483,7 +505,7 @@ reference to an array of C<SNMP::Varbind> objects.  See
 L<SNMP/Acceptable variable formats:> for more details.
 
 If the response value is C<undef>, then any error message can be
-accessed via the C<SNMP::Session> object as $session->{ErrorStr}.
+accessed via the C<SNMP::Session> object as C<$session->{ErrorStr}>.
 
 
 See L<SNMP/SNMP::Session> for details.

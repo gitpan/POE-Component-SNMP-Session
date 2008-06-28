@@ -1,7 +1,12 @@
 Revision history for POE-Component-SNMP-Session
 
-0.10    Fri Oct 19 12:55:56 PDT 2007
+0.11    Fri Jun 27 17:41:05 PDT 2008
+        Fixed the tests... they were broken if there wasn't a proper
+        config, which is unreasonable... it should quietly do nothing.
+        It does that now.  Also updated the docs with a few extra
+        examples.
 
+0.10    Fri Oct 19 12:55:56 PDT 2007
         Updated docs.  Added a couple of examples, and corrected the
         type names returned to query callbacks.  Also updated the
         LICENSE in Makefile.PL... love those Kwalitee points!

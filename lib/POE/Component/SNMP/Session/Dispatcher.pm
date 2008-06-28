@@ -128,7 +128,7 @@ sub __create_pdu {
         $session, $method, $snmp_args, $postback, $callback_args,
         @args) = @_[OBJECT, KERNEL, ARG0..$#_];
 
-    # my args are [ $session => $method => \@snmp_args, $callback ]
+    # $callback_args = [ $session => $method => \@snmp_args, $callback ]
 
     my $callback =
       sub {
@@ -165,7 +165,7 @@ sub __create_pdu {
     $this->_inc_pending($session);
 
     {
-        local $SNMP::debugging = SNMP_DEBUG;
+        local $SNMP::debugging = SNMP_DEBUG if SNMP_DEBUG;
         $ok = $session->$method( @$snmp_args,
                                  $callback
                                );
@@ -210,7 +210,7 @@ sub __socket_callback {
     DEBUG_INFO('{--------  invoking callback for [%d]', $fd);
 
     {
-        local $SNMP::debugging = SNMP_DEBUG;
+        local $SNMP::debugging = SNMP_DEBUG if SNMP_DEBUG;
         SNMP::reply_cb($fd);
     }
 
@@ -289,6 +289,8 @@ sub _timeout_check {
     my $this = shift;
     my $delay_id = $this->_timeout_id();
     my $delay;
+
+    DEBUG_INFO(' start');
 
     # iro e n nes a voki select_info() ir, t e kud & l tav i miutz
     # e urd.
@@ -513,8 +515,6 @@ sub _get_pending {
 # }}} pending requests
 #####
 
-
-
 # {{{ _fileno
 
 sub _fileno {
@@ -567,35 +567,6 @@ sub _sock_from_session {
 }
 
 # }}} _sock_from_fd
-
-
-# {{{ _arg_scan
-
-# scan an array for a key matching qw/ -key key Key KEY / and fetch
-# the value. return the value and the remaining arg list minus the
-# key/value pair.
-sub _arg_scan {
-    my ($key, @arg) = @_;
-
-    my $value;
-    # scan the @arg for any keys that are callback args.
-    for (0..$#arg) {
-        if ($arg[$_] =~ /^
-                         -?
-                         $key
-                         $
-                         /ix) {
-            $value = $arg[$_ + 1];
-
-            # splice out the key and value from @arg:
-            splice @arg, $_, 2;
-        }
-    }
-
-    ($value, @arg);
-}
-
-# }}} _arg_scan
 
 # }}} PRIVATE METHODS
 

@@ -78,10 +78,10 @@ my $oid_ssCpuRawNice    = ".1.3.6.1.4.1.2021.11.52";
 my $oid_ssCpuRawIdle    = ".1.3.6.1.4.1.2021.11.53";
 
 my $vblist = SNMP::VarList->new([laLoad => 1],
-                                [sysName => 0],
-                                [lmTempSensorsValue => 1],
-                                [lmTempSensorsValue => 2],
-                                [lmTempSensorsValue => 3],
+#                                 [sysName => 0],
+#                                 [lmTempSensorsValue => 1],
+#                                 [lmTempSensorsValue => 2],
+#                                 [lmTempSensorsValue => 3],
                                );
 
 $load1_oid = 'lmTempSensorsValue.2';
@@ -140,6 +140,7 @@ my %snmp_community;
 
             $snmp_host{$name} = [$host, $color];
             if (defined $community) {
+                # print "using community $community for $name ($host)\n";
                 $snmp_community{$name} = $community;
             }
 
@@ -293,19 +294,23 @@ sub _start {
     if (STATUS_LINE) {
         # Create a Status Line widget, and pass it to Client::TCP
         my $st = $poe_main_window->Label(-text => "- reading stats -");
-        $st->pack(-side => 'bottom', -anchor => 'n', -fill => 'x');
+        $heap->{status_widget} = $st;
+        $st->pack(-side => 'top', -anchor => 'n', -fill => 'x');
 
         $heap->{stat_watcher} =
-          POE::Component::Client::TCP->new( RemoteAddress => 'log1',
-                                            RemotePort => '1001',
-                                            Args => [ $st ],
-                                            Started => sub { $_[HEAP]{st} = $_[ARG0] },
-                                            ServerInput => \&got_status_line,
+          POE::Component::Client::TCP->new( RemoteAddress => 'log1', # 'count1',
+                                            RemotePort    => 10002,
+                                            Args          => [ $st ],
+                                            Started       => sub { $_[HEAP]{st} = $_[ARG0] },
+                                            ServerInput   => \&got_status_line,
+                                            ConnectError  => \&reconnect_statusd,
+                                            Disconnected  => \&reconnect_statusd,
                                           );
     }
 
     # }}} and the status line
 
+    setpriority 0,0,10; # go to low priority
 
 }
 
@@ -333,6 +338,8 @@ sub snmp_response {
 
     my ($alias,   $host, $session, $cmd, @args)  = @$request;
     my ($results) = @$response;
+
+    # use YAML; print Dump($request); die;
 
     my $loadavg = 0;
 
@@ -443,6 +450,13 @@ sub got_status_line {
 }
 
 # }}} got_status_line
+
+sub reconnect_statusd {
+    my $kernel = $_[KERNEL];
+    $kernel->yield('reconnect');
+    $_[HEAP]->{st}->configure(-text => '- disconnected -');
+}
+
 # {{{ redraw_graph
 
 sub redraw_graph {

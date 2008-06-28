@@ -1,7 +1,7 @@
 
 use Test::More;
 
-BEGIN { use_ok('POE::Component::SNMP::Session') };
+# BEGIN { use_ok('POE::Component::SNMP::Session') };
 
 use POE;
 use POE::Component::SNMP::Session;
@@ -11,7 +11,7 @@ use TestPCS;
 
 my $CONF = do "config.cache";
 
-if( $CONF->{skip_all_tests} ) {
+if( $CONF->{skip_all_tests} or not keys %$CONF ) {
     $poe_kernel->run(); # quiets POE::Kernel warning
     plan skip_all => 'No SNMP data specified.';
 }
