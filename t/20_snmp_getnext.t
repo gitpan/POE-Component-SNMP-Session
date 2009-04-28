@@ -4,7 +4,6 @@ use Test::More;
 # BEGIN { use_ok('POE::Component::SNMP::Session') };
 
 use POE;
-use POE::Component::SNMP::Session;
 
 use lib qw(t);
 use TestPCS;
@@ -17,6 +16,7 @@ if( $CONF->{skip_all_tests} or not keys %$CONF ) {
 }
 else {
     plan tests => 19;
+    require POE::Component::SNMP::Session;
 }
 
 
@@ -30,7 +30,7 @@ POE::Session->create
 );
 
 
-$POE::Component::SNMP::Session::Dispatcher::DEBUG = 1;
+# $POE::Component::SNMP::Session::Dispatcher::DEBUG = 1;
 
 $poe_kernel->run;
 
@@ -77,10 +77,10 @@ sub snmp_get_cb {
         ok ref $result eq 'SNMP::VarList', "SNMP::VarList eq " . ref $result; # no error
 
         foreach my $varlist ($result) {
-            ok ref $varlist eq 'SNMP::VarList', ref ($var) . ' e SNMP::VarList';
+            ok ref $varlist eq 'SNMP::VarList', ref ($var) . ' is SNMP::VarList';
             # if ref $varlist = 'SNMP::VarList'
             for my $var ( @$varlist ) {
-                ok ref $var eq 'SNMP::Varbind', ref ($var) . ' e SNMP::Varbind';
+                ok ref $var eq 'SNMP::Varbind', ref ($var) . ' is SNMP::Varbind';
                 # varbinds are just array refs
 
                 push @{$heap->{results}{$var->[0]}}, $var->[2]; # got a result

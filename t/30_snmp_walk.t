@@ -4,7 +4,6 @@ use Test::More;
 # BEGIN { use_ok('POE::Component::SNMP::Session') };
 
 use POE;
-use POE::Component::SNMP::Session;
 
 use lib qw(t);
 use TestPCS;
@@ -16,6 +15,7 @@ if ( $CONF->{skip_all_tests} or not keys %$CONF ) {
     plan skip_all => 'No SNMP data specified.';
 } else {
     plan tests => 13;
+    require POE::Component::SNMP::Session;
 }
 
 
@@ -88,14 +88,14 @@ sub snmp_get_cb {
 
     ok ref $href, ref $href;
 
-    ok ref $href eq 'ARRAY', 'data type e sane'; # no error
+    ok ref $href eq 'ARRAY', 'data type is sane'; # no error
 
     # foreach my $k (keys %$href) {
     foreach my $varlist (@$href) {
-	ok ref $varlist eq 'SNMP::VarList', ref ($varlist) . ' e SNMP::VarList';
+	ok ref $varlist eq 'SNMP::VarList', ref ($varlist) . ' is SNMP::VarList';
         # if ref $varlist = 'SNMP::VarList'
         for my $var ( @$varlist ) {
-            # ok ref $var eq 'SNMP::Varbind', ref ($var) . ' e SNMP::Varbind';
+            # ok ref $var eq 'SNMP::Varbind', ref ($var) . ' is SNMP::Varbind';
             # varbinds are just array refs
 
             push @{$heap->{results}{$var->[0]}}, $var->[2]; # got a result
@@ -117,7 +117,7 @@ sub stop_session {
 
    ok exists $r->{ifNumber};
    ok exists $r->{ifDescr};
-   ok ref $r->{ifNumber} eq 'ARRAY' and   $r->{ifNumber}[0]  >   0;
-   ok ref $r->{ifDescr}  eq 'ARRAY' and @{$r->{ifDescr}}     ==  $r->{ifNumber}[0];
+   ok ref $r->{ifNumber} eq 'ARRAY' &&   $r->{ifNumber}[0]   >  0;
+   ok ref $r->{ifDescr}  eq 'ARRAY' && @{$r->{ifDescr}}     ==  $r->{ifNumber}[0];
 
 }

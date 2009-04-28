@@ -23,7 +23,7 @@ our $INSTANCE;            # reference to our Singleton object
 use constant VERBOSE => 0; # debugging, that is
 
 use constant SNMP_DEBUG        => 0; # set to 2 for output, 3 includes packet dumps
-use constant SNMP_SELECT_DEBUG => 0; # set to 2 or 3 to see anything.
+# use constant SNMP_SELECT_DEBUG => 0; # set to 2 or 3 to see anything.
 
 # sub DEBUG_INFO() {   }
 # sub DEBUG_INFO { my $pat = shift; printf "$pat\n", @_ }
@@ -31,7 +31,7 @@ our $DEBUG = 0;
 our $DO_DISPATCH = 0;
 
 # $SNMP::verbose = $DEBUG;
-# $SNMP::debugging = 0;
+# $SNMP::debugging = 3;
 # $SNMP::debug_internals = $DEBUG;
 
 # {{{ instance methods and constructor
@@ -46,7 +46,7 @@ sub _new     {
     my $self = {};
     bless $self, $class;
 
-    return $self->_new_session();
+    $self->_new_session();
 }
 
 sub _new_session {
@@ -79,7 +79,7 @@ sub _new_session {
 
                           ]);
 
-    return $this;
+    $this;
 }
 
 sub _alias {'_poe_component_snmp_session_dispatcher'}
@@ -95,14 +95,11 @@ sub _alias {'_poe_component_snmp_session_dispatcher'}
 
 sub _start {
     $_[KERNEL]->alias_set($_[OBJECT]->_alias);
-    return;
 }
 
 sub _stop  {
     $_[KERNEL]->alias_remove($_[OBJECT]->_alias);
     undef $INSTANCE;
-
-    return; # dang perl critic!
 }
 
 # }}} _start and _stop
@@ -116,8 +113,6 @@ sub __listen {
     $this->_session_from_fd($fd => $session);
 
     $this->_watch_socket($this->_sock_from_fd($fd));
-
-    return;
 }
 
 # }}} __listen
@@ -217,8 +212,6 @@ sub __socket_callback {
     DEBUG_INFO(' --------} callback complete for [%d]', $fd);
 
     $this->_timeout_check();
-
-    return;
 }
 
 # }}} __socket_callback
@@ -241,8 +234,6 @@ sub __timeout_callback {
     $this->_timeout_check();
 
     DEBUG_INFO(' --------} callback complete' );
-
-    return;
 }
 
 # }}} __timeout_callback
@@ -273,8 +264,6 @@ sub __clear_pending {
     } else {
         $this->_unwatch_socket($this->_sock_from_fd($fd));
     }
-
-    return;
 }
 
 # }}} __clear_pending
@@ -299,7 +288,7 @@ sub _timeout_check {
     # in the api call and the delay in seconds is returned.
 
     # local $SNMP::debugging = 3;
-    0 and $delay = SNMP::check_timeout();
+    # $delay = SNMP::check_timeout(); # deferred so that kernel calls happen closer to check_timeout().
 
     if (defined $delay_id) {
         # $delay_id is defined. adjust it.
@@ -308,9 +297,9 @@ sub _timeout_check {
             # $delay is non-0, which means we've just gotten a
             # different value from previous.  Adjust our global
             # timeout $delay seconds out.
-            POE::Kernel->delay_adjust($this->_timeout_id() => $delay);
+            POE::Kernel->delay_adjust($delay_id => $delay);
 
-            DEBUG_INFO(' adjusted delay id %d %f seconds', $this->_timeout_id(), $delay);
+            DEBUG_INFO(' adjusted delay id %d %f seconds', $delay_id, $delay);
 
         } else {
             # $delay is 0, which means there is nothing pending.
@@ -335,7 +324,7 @@ sub _timeout_check {
 
     }
 
-    return $delay;
+    # return $delay;
 }
 
 # }}}  _timeout_check
@@ -383,9 +372,6 @@ sub _clear_session {
     my $fd = delete $this->{_s_to_fd}{$session};
     my $sock = delete $this->{_fd_to_sock}{$fd};
     delete $this->{_fd_to_s}{$fd};
-
-    # WWW { c => $this, sede => $session };
-    return;
 }
 
 # }}} _clear_session

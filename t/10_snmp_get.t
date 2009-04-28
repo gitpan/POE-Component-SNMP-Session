@@ -3,7 +3,6 @@
 use Test::More; # qw/no_plan/;
 
 use POE;
-use POE::Component::SNMP::Session;
 
 use lib qw(t);
 use TestPCS;
@@ -16,6 +15,8 @@ if( $CONF->{skip_all_tests} or not keys %$CONF ) {
 }
 else {
     plan tests => 12;
+    require POE::Component::SNMP::Session;
+
 }
 
 # use POE::Component::DebugShell;
@@ -40,7 +41,7 @@ exit 0;
 sub snmp_get_tests {
     my ($kernel, $heap) = @_[KERNEL, HEAP];
 
-    $POE::Component::SNMP::Session::Dispatcher::DEBUG = 1;
+    # $POE::Component::SNMP::Session::Dispatcher::DEBUG = 1;
 
     POE::Component::SNMP::Session->create(
                                           Alias     => 'snmp',
@@ -54,7 +55,7 @@ sub snmp_get_tests {
                                          );
 
     # $SNMP::debugging = 2;
-    $kernel->post( snmp => 'get', 'snmp_get_cb', 'sysDescr.0');
+    $kernel->post( snmp => 'get', 'snmp_get_cb', 'sysDescr.0' );
     get_sent($heap);
 
     if (1) {
@@ -94,18 +95,4 @@ sub stop_session {
 
     ok exists($r->{'sysDescr'}), 'known result';
     ok exists($r->{'sysObjectID'}), 'known result';
-}
-
-sub get_sent { ++$_[0]->{get_sent} }
-
-sub get_seen { ++$_[0]->{get_seen} }
-
-sub set_sent { ++$_[0]->{set_sent} }
-
-sub set_seen { ++$_[0]->{set_seen} }
-
-sub check_done {
-    $_[0]->{set_sent} == $_[0]->{set_seen}
-        and
-        $_[0]->{get_sent} == $_[0]->{get_seen}
 }

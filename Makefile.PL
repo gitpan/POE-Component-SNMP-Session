@@ -5,6 +5,8 @@ use ExtUtils::MakeMaker;
 my $CONFIG_MODE = 0600;
 my $CONFIG_FILE = "config.cache";
 
+my $require_SNMP = $ENV{AUTOMATED_TESTING} ? 0 : 1;
+
 WriteMakefile(
               NAME                => 'POE::Component::SNMP::Session',
               AUTHOR              => 'Rob Bloodgood <rdb@cpan.org>',
@@ -13,7 +15,7 @@ WriteMakefile(
               LICENSE             => 'perl',
               PL_FILES            => {},
               PREREQ_PM           => {
-                                      'SNMP'       => 3.1,
+                                      # ('SNMP'       => 3.1) x $require_SNMP,
                                       'POE'        => 0.38,
                                       'Test::More' => 0,
                                      },
@@ -24,7 +26,7 @@ WriteMakefile(
 
 my $DEBUG_FLAG = 0x00; # none
 
-print "The test suite requires access to an SNMP agent.\n";
+print "The test suite requires access to an SNMP agent.\n" unless $ENV{AUTOMATED_TESTING};
 my $hostname = prompt("enter a hostname [leave empty to skip all tests]");
 
 if ($hostname) {
@@ -45,7 +47,7 @@ CONFIGURATION
 } else {
     print "creating $CONFIG_FILE\n";
     open TESTCONF, "> $CONFIG_FILE" or die "can't create $CONFIG_FILE: $!\n";
-    print TESTCONF "\$TEST_CONF = { skip_all_tests => 1 };\n";
+    print TESTCONF "\$CONF = { skip_all_tests => 1 };\n";
     close TESTCONF or die "can't close $CONFIG_FILE: $!\n";
 }
 

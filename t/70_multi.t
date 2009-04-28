@@ -4,7 +4,7 @@ use strict;
 use lib qw(t);
 use TestPCS;
 
-use POE qw/Component::SNMP::Session/;
+use POE;
 
 my $CONF = do "config.cache";
 
@@ -14,6 +14,7 @@ if ( $CONF->{skip_all_tests} or not keys %$CONF ) {
 } else {
     if (1) {
         plan tests => 70;
+        require POE::Component::SNMP::Session;
     } else {
         $poe_kernel->run(); # quiets POE::Kernel warning
         plan skip_all => 'not done yet';
@@ -351,5 +352,6 @@ exit 0;
 sub check_done_multi {
     my ($heap, $alias) = @_;
 
+    no warnings "uninitialized";
     return $alias if $heap->{$alias}{get} + $heap->{$alias}{getbulk} == $heap->{pending}{$alias};
 }

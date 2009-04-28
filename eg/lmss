@@ -228,17 +228,8 @@ sub _start {
                                                                );
 
 
-            if (0) {
-                $kernel->call( "snmp_$name" => get => snmp_response =>
-                               # -varbindlist => [ $load1_oid ],
-                               $vblist,
-                             );
-            } else {
-
-                # $kernel->yield(snmp_poll => $name);
-                $kernel->call($_[SESSION] => snmp_poll => $name);
-
-            }
+            # $kernel->yield(snmp_poll => $name);
+            $kernel->call($_[SESSION] => snmp_poll => $name);
 
             # mark poll time
 	    $heap->{next}{$name} = $heap->{time}{$name} = time;
@@ -465,17 +456,19 @@ sub redraw_graph {
     # defer the call to $heap->{ca}->set() to be the *LAST* call in
     # this function.
 
-    my %v = @{$heap->{values}};
-    $heap->{values} = []; # empty update list
-
     $kernel->delay_add( redraw_graph => $REDRAW_DELAY );
 
-    return unless keys %v; # don't redraw unless we have changed data
-    if (DO_GRAPH) {
+    return unless @{$heap->{values}}; # don't redraw unless we have changed data
+
+    my $v = $heap->{values};
+    $heap->{values} = []; # empty update list
+
+    # return unless keys %v;    
+        if (DO_GRAPH) {
         if ($VERBOSE) {
             print "REDRAW\n";
         }
-        $heap->{ca}->set(\%v);
+        $heap->{ca}->set({@$v});
     }
 
 }

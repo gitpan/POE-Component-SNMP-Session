@@ -3,7 +3,7 @@ use Test::More; #  qw/no_plan/;
 
 # BEGIN { use_ok('POE::Component::SNMP::Session') };
 
-use POE qw/Component::SNMP::Session/;
+use POE;
 
 use lib qw(t);
 use TestPCS;
@@ -16,6 +16,7 @@ if( $CONF->{skip_all_tests} or not keys %$CONF ) {
 }
 else {
     plan tests => 34;
+    require POE::Component::SNMP::Session;
 }
 
 POE::Session->create

@@ -4,7 +4,6 @@ use strict;
 # BEGIN { use_ok 'POE::Component::SNMP::Session' };
 
 use POE;
-use POE::Component::SNMP::Session;
 
 use lib qw(t);
 use TestPCS;
@@ -21,6 +20,7 @@ if ( $CONF->{skip_all_tests} ) {
     plan skip_all => 'No SNMP data specified.';
 } else {
     plan tests => 27;
+    require POE::Component::SNMP::Session;
 }
 
 

@@ -20,11 +20,11 @@ POE::Component::SNMP::Session - Wrap Net-SNMP's SNMP::Session in POE
 
 =head1 VERSION
 
-Version 0.11
+Version 0.12
 
 =cut
 
-our $VERSION = '0.11';
+our $VERSION = '0.1200';
 
 =head1 SYNOPSIS
 
@@ -101,6 +101,11 @@ This means that if your C<DestHost> doesn't respond, your program will
 block for C<Timeout> microseconds (default 1s).  Also, if
 authentication fails, the constructor will fail, so it is important to
 check the return value of C<create()> in this case.
+
+NOTE: C<Timeout> values are in I<microseconds>, not seconds.  Setting
+a value like 60 and thinking it's seconds will cause your requests to
+timeout before they've finished transmitting, and confusion will
+ensue.
 
 =back
 
