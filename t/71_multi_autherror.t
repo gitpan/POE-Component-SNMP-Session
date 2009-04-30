@@ -113,9 +113,6 @@ sub get_cb {
 
     ok $cmd eq 'get', "callback destination is preserved (get)";
 
-    use YAML;
-    print Dump( { axo => $results } );
-
     if (1) {
         if (ref $results) {
 	    ok ref $results eq 'SNMP::VarList', ref $results; # no error
@@ -140,7 +137,6 @@ sub get_cb2 {
 
     ok get_seen($heap);
 
-    # use YAML; print Dump($session);
     ok ref $results ne 'SNMP::VarList', 'response is NOT an SNMP value'; # GOT AN ERROR!
 
     ok ! ref $results, "Invalid community string does NOT return a reference";

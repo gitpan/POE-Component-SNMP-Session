@@ -1,6 +1,6 @@
 --- #YAML:1.0
 name:               POE-Component-SNMP-Session
-version:            0.1200
+version:            0.1201
 abstract:           Wrap Net-SNMP's SNMP::Session in POE
 author:
     - Rob Bloodgood <rdb@cpan.org>

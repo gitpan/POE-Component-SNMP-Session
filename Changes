@@ -1,5 +1,18 @@
 Revision history for POE-Component-SNMP-Session
 
+0.1201  Thu Apr 30 12:43:49 PDT 2009
+        So it seems I left reference to 'YAML' in 2 of the tests, and
+        while it's installed automatically these days by CPAN,
+        apparently some smoke testers don't include it in their
+        sandbox. <sigh>
+
+0.1200  Tue Apr 28 16:40:00 PDT 2008
+        Updated the tests AGAIN, bumping the version number to have
+        more digits for small subreleases.  Now, SNMP.pm is *not* a
+        listed requirement, as it can *not* be auto-installed from
+        CPAN.  So the tests "pass" by not running anything at all in
+        an automated setting.  It's cheesy but it works.
+
 0.11    Fri Jun 27 17:41:05 PDT 2008
         Fixed the tests... they were broken if there wasn't a proper
         config, which is unreasonable... it should quietly do nothing.

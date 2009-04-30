@@ -12,8 +12,6 @@ my $sysContact = '.1.3.6.1.2.1.1.4.0';
 # my $sysContact = '.1.3.6.1.2.1.1.4.0';
 # my $sysContact = 'sysContact';
 
-use YAML;
-
 my $CONF = do "config.cache";
 
 if( $CONF->{skip_all_tests} or not keys %$CONF ) {
