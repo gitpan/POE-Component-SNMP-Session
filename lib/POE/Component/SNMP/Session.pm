@@ -20,11 +20,11 @@ POE::Component::SNMP::Session - Wrap Net-SNMP's SNMP::Session in POE
 
 =head1 VERSION
 
-Version 0.12
+Version 0.1202
 
 =cut
 
-our $VERSION = '0.1201';
+our $VERSION = '0.1202';
 
 =head1 SYNOPSIS
 
@@ -36,9 +36,15 @@ POE's non-blocking event loop, to perform asynchronous SNMP requests.
     POE::Component::SNMP::Session->create();
     ...
 
-NOTE: this is NOT based on the L<Net::SNMP> module by David
-Town.  See L<POE::Component::SNMP> for an async interface to
-L<Net::SNMP>.
+
+NOTE: the Perl support for net-snmp is NOT installable via CPAN.  On
+most linux distros, it is usually available as a companion package to
+net-snmp.  The Windows port comes with an PPD package for ActiveState
+Perl that must be installed manually.  
+
+NOTE: this module is NOT based on the (mostly) pure-perl L<Net::SNMP>
+module by David M. Town.  See L<POE::Component::SNMP> for an async
+interface to L<Net::SNMP>.
 
 =head1 CREATING SNMP COMPONENTS
 
@@ -47,8 +53,6 @@ L<Net::SNMP>.
 # }}} pod intro
 
 our $DEBUG = 0;
-
-# use Spiffy qw/:XXX/;
 
 our $DISPATCHER;
 
@@ -191,15 +195,16 @@ sub create {
                                              _stop         => \&_end_snmp_session,
                                              finish        => \&_close_snmp_session,
 
-                                              get           => \&_snmp_get,
-                                              getnext       => \&_snmp_getnext,
-                                              bulkwalk      => \&_snmp_bulkwalk,
-                                              getbulk       => \&_snmp_getbulk,
-#                                              getentries    => \&_snmp_getentries,
+                                             get           => \&_snmp_get,
+                                             getnext       => \&_snmp_getnext,
+                                             bulkwalk      => \&_snmp_bulkwalk,
+                                             getbulk       => \&_snmp_getbulk,
 
-#                                              trap          => \&_snmp_trap,
-#                                              trap2c        => \&_snmp_trap2c,
-#                                              inform        => \&_snmp_inform,
+                                             # getentries    => \&_snmp_getentries,
+
+                                             # trap          => \&_snmp_trap,
+                                             # trap2c        => \&_snmp_trap2c,
+                                             # inform        => \&_snmp_inform,
 
                                              set           => \&_snmp_set,
 
@@ -225,15 +230,14 @@ sub _start_snmp_session {
 
     $kernel->alias_set($alias);
 
-    # $heap->{comp_alias}   = $alias;    # component alias
-    $heap->{snmp_session} = $session;  # SNMP::Session
+    $heap->{snmp_session}  = $session;  # SNMP::Session
     $heap->{postback_args} = [
                               $alias,
                               $hostname,
                               $session,
                              ];
 
-    $kernel->call($DISPATCHER->_alias => __listen => $session, $fd);
+    $DISPATCHER->_listen($session, $fd);
 
     return 1;
 }
@@ -279,6 +283,8 @@ sub _end_snmp_session {
 }
 
 # }}} _end_snmp_session
+
+# {{{ REQUESTS pod
 
 =head1 REQUESTS
 
@@ -362,6 +368,8 @@ discarded.
 
 =cut
 
+# }}} REQUESTS pod
+
 sub _snmp_get        { _snmp_request( get      => @_ ) }
 sub _snmp_getnext    { _snmp_request( getnext  => @_ ) }
 sub _snmp_set        { _snmp_request( set      => @_ ) }
@@ -379,8 +387,8 @@ sub _snmp_request {
     my ($kernel, $heap, $sender, $target_state, @snmp_args) = @_[KERNEL, HEAP, SENDER, ARG0..$#_];
     my $session = $heap->{snmp_session};
 
-    # extract the PoCo::SNMP request method called, for diagnostics
-    # 'POE::Component::SNMP::snmp_get' => 'get'
+    # extract the request method called, for diagnostics
+    # 'POE::Component::SNMP::Session::_snmp_get' => 'get'
     my $action = (caller(1))[3]; $action =~ s/POE::Component::SNMP::Session::_snmp_//;
 
     my (@callback_args, $callback_args);
@@ -393,7 +401,6 @@ sub _snmp_request {
             @callback_args = @$callback_args;
         } else {
             $ok = 0;
-            # $heap->{snmp_session}->_error("Argument to -callback_args must be an arrayref");
             $session->{ErrorStr} = "Argument to -callback_args must be an arrayref";
             @callback_args = ($callback_args); # stash the "bad" argument to return with the error
         }
@@ -510,11 +517,10 @@ reference to an array of C<SNMP::Varbind> objects.  See
 L<SNMP/Acceptable variable formats:> for more details.
 
 If the response value is C<undef>, then any error message can be
-accessed via the C<SNMP::Session> object as C<$session->{ErrorStr}>.
-
+accessed via the C<SNMP::Session> object as C<< $session->{ErrorStr}
+>>.
 
 See L<SNMP/SNMP::Session> for details.
-
 
 =head1 AUTHOR
 
@@ -569,7 +575,7 @@ L<http://search.cpan.org/dist/POE-Component-SNMP-Session>
 
 =head1 COPYRIGHT & LICENSE
 
-Copyright 2007 Rob Bloodgood, all rights reserved.
+Copyright 2007-2009 Rob Bloodgood, all rights reserved.
 
 This program is free software; you can redistribute it and/or modify it
 under the same terms as Perl itself.

@@ -4,7 +4,6 @@ use strict;
 use warnings;
 
 use SNMP;
-# use Spiffy qw/:XXX/;
 
 use Carp;
 # use base qw/SNMP::Session/;
@@ -18,8 +17,6 @@ use Time::HiRes qw/time/;
 
 our $INSTANCE;            # reference to our Singleton object
 
-# our $MESSAGE_PROCESSING;  # reference to single MP object
-
 use constant VERBOSE => 0; # debugging, that is
 
 use constant SNMP_DEBUG        => 0; # set to 2 for output, 3 includes packet dumps
@@ -28,7 +25,6 @@ use constant SNMP_DEBUG        => 0; # set to 2 for output, 3 includes packet du
 # sub DEBUG_INFO() {   }
 # sub DEBUG_INFO { my $pat = shift; printf "$pat\n", @_ }
 our $DEBUG = 0;
-our $DO_DISPATCH = 0;
 
 # $SNMP::verbose = $DEBUG;
 # $SNMP::debugging = 3;
@@ -52,31 +48,19 @@ sub _new     {
 sub _new_session {
     my $this = shift;
 
-    #### constructor: $this
-
-    # $this->{_active} = Net::SNMP::Message::TRUE;
-    # $this->{_active} = 1;
-
-    #  $MESSAGE_PROCESSING = $Net::SNMP::Dispatcher::MESSAGE_PROCESSING;
     POE::Session->create( object_states =>
-                          [ $this => [
-                                      qw/
-                                         _start
-                                         _stop
-                                         __timeout_callback
-                                         __socket_callback
-                                         __clear_pending
+                          [ $this => [ qw/ _start
+                                           _stop
+                                           __timeout_callback
+                                           __socket_callback
+                                           __clear_pending
 
-                                         __create_pdu
-                                         __listen
+                                           __create_pdu
+                                           __listen
 
-                                         _send_pdu
+                                           _send_pdu
                                          /
                                      ],
-                            # __schedule_event
-
-                            # __dispatch_pdu
-
                           ]);
 
     $this;
@@ -123,6 +107,7 @@ sub __create_pdu {
         $session, $method, $snmp_args, $postback, $callback_args,
         @args) = @_[OBJECT, KERNEL, ARG0..$#_];
 
+    # $callback_args is defined as:
     # $callback_args = [ $session => $method => \@snmp_args, $callback ]
 
     my $callback =
@@ -132,7 +117,7 @@ sub __create_pdu {
           DEBUG_INFO("{{{{ callback start");
 
           # deliver response
-          DEBUG_INFO("     sending POE postback");
+          DEBUG_INFO("     dispatching POE postback");
           # print STDOUT Dump($DISPATCHER);
           $postback->(@_,
                       @$callback_args,
@@ -140,8 +125,8 @@ sub __create_pdu {
 
           # handle cleanups
 
-          my $fd = $this->_fd_from_session($session);
           my $pending = $this->_dec_pending($session);
+          my $fd = $this->_fd_from_session($session);
 
           if ($pending == 0 and exists $this->{_unwatch}{$fd}) {
               delete $this->{_unwatch}{$fd};
@@ -156,8 +141,6 @@ sub __create_pdu {
     ## send an SNMP request.  If error free, check with the API about
     ## timeouts. otherwise return the error.
     DEBUG_INFO("sending request");
-
-    $this->_inc_pending($session);
 
     {
         local $SNMP::debugging = SNMP_DEBUG if SNMP_DEBUG;
@@ -181,6 +164,9 @@ sub __create_pdu {
         return;
     }
 
+    # flag that we have a pending request in the queue.
+    $this->_inc_pending($session);
+
     DEBUG_INFO("sent    request");
 
     # check timeouts, set delays.  delays WILL have changed after
@@ -197,10 +183,10 @@ sub __create_pdu {
 # {{{ __socket_callback
 
 sub __socket_callback {
-    my ($this, $kernel, $heap, $socket) = @_[OBJECT, KERNEL, HEAP, ARG0];
+    my ($this, $kernel, $socket) = @_[OBJECT, KERNEL, ARG0];
+    my $fd = $socket->fileno;
 
     ### ah-HAH, we got a response!
-    my $fd  = $socket->fileno;
 
     DEBUG_INFO('{--------  invoking callback for [%d]', $fd);
 
@@ -218,11 +204,9 @@ sub __socket_callback {
 # {{{ __timeout_callback
 
 sub __timeout_callback {
-    # my ($session, @args) = @_;
+    my ($this) = @_; # $_[OBJECT];
 
     ### oh NO!! We timed out!
-
-    my ($this, $kernel) = @_[OBJECT, KERNEL];
 
     DEBUG_INFO('{--------  invoking scheduled callback id %d',
                $this->_timeout_id());
@@ -245,7 +229,7 @@ sub __timeout_callback {
 # listening for a reply to that session, that reply *will* be
 # delivered when it arrives.
 #
-# this event is invoked from P::C::S::close_snmp_session(), to help us
+# this event is invoked from PoCo:S::close_snmp_session(), to help us
 # keep in sync.
 #
 # This event exists as an event so that _unwatch_socket() will live in
@@ -360,6 +344,24 @@ sub _send_pdu {
 }
 
 # }}} _send_pdu
+
+# {{{ _listen
+
+# this method exists to create sugar, so that we can say:
+#
+# $DISPATCHER->_listen(@args)
+#
+# instead of
+#
+# $kernel->call( $DISPATCHER->_alias => __listen => @args)
+
+sub _listen {
+    my $this = shift;
+    POE::Kernel->call(_alias() => __listen => @_);
+}
+
+# }}} _listen
+
 
 # {{{ _clear_session
 

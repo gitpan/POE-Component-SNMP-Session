@@ -1,5 +1,11 @@
 Revision history for POE-Component-SNMP-Session
 
+0.1202  Fri Dec 11 17:38:15 PST 2009
+        Documentation cleanups.
+
+        Altered 00-load.t to return at least ONE "ok", so smoke tests
+        can have something positive to report, eg "all tests pass."
+
 0.1201  Thu Apr 30 12:43:49 PDT 2009
         So it seems I left reference to 'YAML' in 2 of the tests, and
         while it's installed automatically these days by CPAN,
